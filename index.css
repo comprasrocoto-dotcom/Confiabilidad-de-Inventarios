@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* === PALETA PROFESIONAL AUDITORÍA === */
+  --color-primary: #0F2044;
+  --color-primary-hover: #1A3A6B;
+  --color-secondary: #1B4F8A;
+  --color-secondary-hover: #153D6F;
+  --color-accent: #C4973A;
+  --color-accent-hover: #A87D2E;
+
+  --color-success: #1A7A4A;
+  --color-warning: #B87333;
+  --color-danger: #8B1A1A;
+  --color-background: #EEF2F7;
+  --color-card: #FFFFFF;
+  --color-border: #C8D4E0;
+  --color-text-main: #0F2044;
+  --color-text-secondary: #4A5568;
+
+  --color-table-header: #0F2044;
+  --color-table-header-text: #FFFFFF;
+  --color-row-alt: #F5F8FC;
+  --color-row-hover: #E4EDF7;
+
+  --color-brand-primary: var(--color-primary);
+  --color-brand-secondary: var(--color-secondary);
+  --color-brand-bg: var(--color-background);
+  --color-brand-border: var(--color-border);
+  --color-brand-text: var(--color-text-main);
+  --color-brand-text-secondary: var(--color-text-secondary);
+
+  --color-status-sobrante: #1A7A4A;
+  --color-status-faltante: #8B1A1A;
+  --color-status-sin-diferencia: #7A8899;
+  --color-status-cobra: #8B1A1A;
+  --color-status-sin-cobra: var(--color-text-secondary);
+
+  --color-kpi-revisados: #1B4F8A;
+  --color-kpi-faltantes: #B87333;
+  --color-kpi-cobrables: #8B1A1A;
+  --color-kpi-valor: #1A7A4A;
+
+  --color-brand-table-hover: var(--color-row-hover);
+  --color-brand-table-selected: #DDE8F5;
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text-main font-sans;
+  }
+}
+
+@layer components {
+  .table-header {
+    @apply bg-table-header text-table-header-text font-bold;
+  }
+  .btn-primary {
+    @apply bg-secondary text-white transition-colors rounded-[4px] font-bold;
+  }
+  .btn-primary:hover {
+    @apply bg-secondary-hover;
+  }
+  .card {
+    @apply bg-card border border-border shadow-sm rounded-[8px];
+  }
+  .status-success { @apply text-success; }
+  .status-warning { @apply text-warning; }
+  .status-danger { @apply text-danger; }
+  .sidebar { @apply bg-[#0A1628]; }
+  .sidebar-icon-active { @apply text-secondary; }
+  .tab-active { @apply bg-white border border-border text-primary; }
+}
