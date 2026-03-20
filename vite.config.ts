@@ -10,5 +10,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, '.'),
     },
   },
-  assetsInclude: ['**/*.xlsx'],
+  // /public folder is served as-is — no configuration needed
 });
