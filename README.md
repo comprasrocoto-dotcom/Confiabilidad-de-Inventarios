@@ -1,35 +1,40 @@
-# Sistema de Auditoría de Inventarios v2.0
+# Sistema de Auditoría de Inventarios
 
-Sistema profesional de cruce de inventarios y cobros por sede.
+## Configuración en Vercel
 
-## Características
+### Paso 1 — Importar el repositorio
+1. Ir a https://vercel.com/new
+2. Conectar el repositorio de GitLab
+3. Vercel detectará Vite automáticamente
 
-- **Base de datos preintegrada**: 1,771 registros listos (Malanga, Rocoto Laureles, Rocoto Amsterdam, Rocoto Provenza, Hot Wings)
-- **Márgenes de error calibrados**: Onzas y Copas ±3 | Gramos >1,000g | Unidades >1
-- **Informe comparativo de barras**: Faltantes vs Sobrantes por sede con semáforo visual
-- **Confiabilidad por sede**: Ranking, mapa de calor, y reportes PDF/Excel
-- **Trazabilidad histórica**: Análisis por mes/semana/día
-- **Paleta profesional**: Navy institucional + dorado auditor
+### Paso 2 — Configuración del proyecto (IMPORTANTE)
+En la pantalla de configuración de Vercel, asegurarse de:
 
-## Instalación
+| Campo | Valor |
+|-------|-------|
+| Framework Preset | **Vite** |
+| Root Directory | **./** (dejar vacío) |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Install Command | `npm install` |
+| Node.js Version | **18.x** |
+
+### Paso 3 — Deploy
+Hacer clic en **Deploy**. El primer deploy toma ~2 minutos.
+
+## Actualizar la Base de Datos
+
+Para cargar datos nuevos:
+1. Ir a GitLab → carpeta `public/`
+2. Seleccionar **"BASE DE DATOS COBROS.xlsx"**
+3. Clic en el ícono de **reemplazar archivo**
+4. Subir el nuevo Excel
+5. Vercel redeploya automáticamente en ~1 minuto
+
+## Desarrollo local
 
 ```bash
 npm install
 npm run dev
+# Abrir http://localhost:5173
 ```
-
-Abrir en: http://localhost:3000
-
-## Uso
-
-La aplicación carga automáticamente la base de datos del repositorio al iniciar.
-Para analizar un nuevo Excel, usar el botón **Cargar Excel** en el header.
-
-## Unidades y márgenes de error
-
-| Unidad    | Margen para cobro |
-|-----------|-------------------|
-| ONZA      | > 3 oz diferencia |
-| COPA      | > 3 copas         |
-| GRAMOS    | > 1,000 g         |
-| UNIDADES  | > 1 unidad        |
