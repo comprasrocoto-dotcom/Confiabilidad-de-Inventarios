@@ -1,12 +1,13 @@
-// Hook que lee el Excel directamente del repositorio (carpeta public/)
-// Para actualizar la BD: reemplaza "BASE DE DATOS COBROS.xlsx" en la carpeta public/ de GitLab
+// Hook que lee el Excel directamente del repositorio
+// Para actualizar la BD: reemplaza "BASE DE DATOS COBROS.xlsx" en GitLab
 import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { normalizeData } from './inventory';
 import { ArticleSummary } from './types';
 
-// El Excel vive en /public — Vite lo sirve en la URL raíz automáticamente
-const EXCEL_URL = '/BASE DE DATOS COBROS.xlsx';
+// Importar el Excel como asset — Vite lo incluye automáticamente en el bundle
+import excelUrl from './BASE DE DATOS COBROS.xlsx?url';
+
 const EXCEL_NAME = 'BASE DE DATOS COBROS.xlsx';
 
 interface PreloadedResult {
@@ -27,14 +28,11 @@ export function usePreloadedInventory(): PreloadedResult {
   useEffect(() => {
     const loadExcel = async () => {
       try {
-        // Fetch the Excel file from /public folder
-        const response = await fetch(EXCEL_URL);
+        const response = await fetch(excelUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
 
-        // Find the main data sheet
         const sheetName = workbook.SheetNames.find(n =>
           n.toUpperCase().includes('BASE') || n.toUpperCase().includes('DATO')
         ) || workbook.SheetNames[0];
@@ -56,7 +54,6 @@ export function usePreloadedInventory(): PreloadedResult {
         }));
       }
     };
-
     loadExcel();
   }, []);
 
