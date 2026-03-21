@@ -172,6 +172,10 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
       for (const f of formats) {
         const d = parse(cleanFecha, f, new Date());
         if (isValid(d)) {
+          // Safety: fix 2-digit years (e.g. year 26 → 2026)
+          if (d.getFullYear() < 100) {
+            d.setFullYear(d.getFullYear() + 2000);
+          }
           parsedDate = d;
           break;
         }
@@ -233,6 +237,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
         debeCobrar: false,
         tipo: 'SIN_VARIACION',
         stockFecha: 0,
+        stockInventario: 0,
         margenAplicado: 0,
         margenTipo: 'FIJO' as const,
         margenPct: 0
@@ -240,7 +245,14 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
     }
 
     const summary = grouped.get(key)!;
+    // Parse stockInventario
+    const stockInvRaw = row.stockInventario;
+    let stockInvVal = 0;
+    if (typeof stockInvRaw === 'number') stockInvVal = stockInvRaw;
+    else if (typeof stockInvRaw === 'string') stockInvVal = parseFloat(stockInvRaw.replace(/,/g, '').trim()) || 0;
+
     summary.movements.push({ fecha, variacion, costeLinea, stockFecha: stockFechaVal });
+    summary.stockInventario = stockInvVal; // last value wins
   });
 
   const articles: ArticleSummary[] = Array.from(grouped.values()).map(summary => {
@@ -266,6 +278,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
       ? summary.movements[summary.movements.length - 1].stockFecha
       : 0;
     summary.stockFecha = ultimoStock;
+    // stockInventario already set from last movement row
 
     const absDiff = Math.abs(totalDiferencia);
     let debeCobrar = false;
@@ -276,22 +289,32 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
     const unit = summary.subarticulo;
 
     if (unit.includes('UNIDAD') || unit.includes('COPA')) {
-      // EXENTO del margen porcentual — margen fijo de 1
+      // EXENTO del margen porcentual — margen fijo de 1 unidad
       margenTipo = 'EXENTO';
       margenAplicado = 1;
       margenPct = 0;
       if (summary.tipo === 'FALTANTE') {
         debeCobrar = absDiff > 1;
       }
+    } else if (unit.includes('ONZA')) {
+      // ONZA: margen fijo ±2 oz (positivo o negativo)
+      margenTipo = 'FIJO';
+      margenAplicado = 2;
+      margenPct = 0;
+      if (summary.tipo === 'FALTANTE') {
+        debeCobrar = absDiff > 2;
+      }
     } else {
-      // Margen del 2.5% sobre el stock a fecha
-      const margenPorcentual = Math.abs(ultimoStock) * 0.025;
+      // Gramos y demás: Margen del 2.5% sobre el stock a fecha (solo negativos)
+      const margenPorcentual = Math.max(Math.abs(ultimoStock) * 0.025, 1);
       margenAplicado = margenPorcentual;
       margenTipo = 'PORCENTAJE';
       margenPct = 2.5;
       if (summary.tipo === 'FALTANTE') {
+        // Solo aplica margen a diferencias negativas
         debeCobrar = absDiff > margenPorcentual;
       }
+      // Sobrantes nunca se cobran
     }
 
     summary.margenAplicado = margenAplicado;
@@ -462,7 +485,7 @@ export function getHistoricalTraceability(
       if (tipo === 'FALTANTE') {
         const unit = art.subarticulo;
         if (unit.includes('GRAMO')) debeCobrar = absDiff > 1000;
-        else if (unit.includes('ONZA') || unit.includes('COPA')) debeCobrar = absDiff > 3;
+        else if (unit.includes('ONZA') || unit.includes('COPA')) debeCobrar = absDiff > 2; // Margen ±2 oz
         else if (unit.includes('UNIDAD')) debeCobrar = absDiff > 1;
         else debeCobrar = absDiff > 1;
       }

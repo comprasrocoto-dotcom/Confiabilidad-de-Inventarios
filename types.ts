@@ -24,6 +24,7 @@ export interface ArticleSummary {
   debeCobrar: boolean;
   tipo: 'FALTANTE' | 'SOBRANTE' | 'SIN_VARIACION';
   stockFecha: number;
+  stockInventario: number;
   margenAplicado: number;
   margenTipo: 'PORCENTAJE' | 'FIJO' | 'EXENTO';
   margenPct: number;

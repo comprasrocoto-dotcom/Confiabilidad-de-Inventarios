@@ -1557,35 +1557,59 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
                   
                   <div className="overflow-hidden rounded-[8px] border border-[#D6DEE6] shadow-sm">
                     <table className="w-full text-left text-sm">
-                      <thead className="bg-[#A7C4E0] text-[#1F3A5F]">
+                      <thead className="bg-[#0F2044] text-white">
                         <tr>
-                          <th className="px-6 py-3 font-bold uppercase tracking-wider text-[10px]">ARTÍCULO</th>
-                          <th className="px-6 py-3 font-bold uppercase tracking-wider text-[10px]">UNIDAD</th>
-                          <th className="px-6 py-3 font-bold uppercase tracking-wider text-[10px] text-right">VARIACIÓN</th>
-                          <th className="px-6 py-3 font-bold uppercase tracking-wider text-[10px] text-right">IMPACTO ECONÓMICO</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">ARTÍCULO</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px]">UNIDAD</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-right">STOCK FECHA</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-right">STOCK INV.</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-right">VARIACIÓN</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-right" style={{color:'#C4973A'}}>PRECIO UNIT.</th>
+                          <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-right" style={{color:'#C4973A'}}>IMPACTO $</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#D6DEE6]">
                         {filteredItems.map((a, i) => (
                           <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-[#F0F4F8]'} hover:bg-[#E5EDF5] transition-colors`}>
-                            <td className="px-6 py-3 font-bold text-[#1F3A5F]">{a.articulo}</td>
-                            <td className="px-6 py-3 text-slate-500 text-[10px] font-bold">{a.subarticulo}</td>
-                            <td className={`px-6 py-3 text-right font-bold ${a.totalDiferencia < 0 ? 'text-[#EB5757]' : a.totalDiferencia > 0 ? 'text-[#27AE60]' : 'text-slate-400'}`}>
+                            <td className="px-4 py-2 font-bold text-[#0F2044] text-xs">{a.articulo}</td>
+                            <td className="px-4 py-2 text-slate-500 text-[10px] font-bold">{a.subarticulo}</td>
+                            <td className="px-4 py-2 text-right text-[11px] text-slate-500">{(a.stockFecha ?? 0).toLocaleString('es-CO', {maximumFractionDigits:2})}</td>
+                            <td className="px-4 py-2 text-right text-[11px] text-slate-500">{(a.stockInventario ?? 0).toLocaleString('es-CO', {maximumFractionDigits:2})}</td>
+                            <td className={`px-4 py-2 text-right font-bold text-xs ${a.totalDiferencia < 0 ? 'text-[#8B1A1A]' : a.totalDiferencia > 0 ? 'text-[#1A7A4A]' : 'text-slate-400'}`}>
                               {a.totalDiferencia > 0 ? '+' : ''}{showOnlyFaltantes ? formatVariation(Math.abs(a.totalDiferencia), a.subarticulo) : formatVariation(a.totalDiferencia, a.subarticulo)}
                             </td>
-                            <td className={`px-6 py-3 text-right font-bold ${a.totalDiferencia < 0 ? 'text-[#EB5757]' : 'text-[#1F3A5F]'}`}>
+                            <td className="px-4 py-2 text-right text-[11px] font-bold text-[#1B4F8A]">
+                              {formatCurrency(a.ultimoCoste || a.costePromedio)}
+                            </td>
+                            <td className={`px-4 py-2 text-right font-bold text-xs ${a.totalDiferencia < 0 ? 'text-[#8B1A1A]' : 'text-[#0F2044]'}`}>
                               {formatCurrency(Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio))}
                             </td>
                           </tr>
                         ))}
                         {filteredItems.length === 0 && (
                           <tr>
-                            <td colSpan={4} className="px-6 py-10 text-center text-slate-400 italic bg-slate-50">
+                            <td colSpan={7} className="px-6 py-10 text-center text-slate-400 italic bg-slate-50">
                               No hay artículos que coincidan con el filtro
                             </td>
                           </tr>
                         )}
                       </tbody>
+                      {filteredItems.length > 0 && (
+                        <tfoot>
+                          <tr className="bg-[#0F2044]">
+                            <td colSpan={4} className="px-4 py-3 text-xs font-bold text-white uppercase tracking-wider">
+                              TOTAL — {filteredItems.length} artículos
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-rose-400 text-xs">
+                              {filteredItems.reduce((acc, a) => acc + a.totalDiferencia, 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3"></td>
+                            <td className="px-4 py-3 text-right font-bold text-[#C4973A] text-sm">
+                              {formatCurrency(filteredItems.reduce((acc, a) => acc + Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio), 0))}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      )}
                     </table>
                   </div>
                 </div>

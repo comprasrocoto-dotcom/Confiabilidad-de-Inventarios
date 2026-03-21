@@ -477,33 +477,59 @@ export const HistoricalTraceability: React.FC<HistoricalTraceabilityProps> = ({ 
           <h3 className="text-sm font-bold text-[#1F3A5F] uppercase tracking-wider mb-8 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-[#2F80ED]" /> Evolución por Sede
           </h3>
-          <div className="h-[300px]">
+          <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={[]}>
+              <BarChart
+                data={(() => {
+                  // Build unified period data for grouped bar chart
+                  const allPeriods = Array.from(new Set(
+                    Object.values(historicalData.bySede).flatMap(s => s.map(p => p.period))
+                  ));
+                  return allPeriods.map(period => {
+                    const row: any = { period };
+                    Object.entries(historicalData.bySede).forEach(([sede, stats]) => {
+                      const periodData = stats.find(s => s.period === period);
+                      row[sede] = periodData ? Math.round(periodData.confiabilidad * 10) / 10 : null;
+                    });
+                    return row;
+                  });
+                })()}
+                margin={{ top: 10, right: 20, left: 0, bottom: 20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                 <XAxis 
-                  dataKey="period" 
-                  allowDuplicatedCategory={false} 
-                  tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} 
+                  dataKey="period"
+                  tick={{ fontSize: 11, fontWeight: 600, fill: '#0F2044' }}
+                  axisLine={{ stroke: '#C8D4E0' }}
+                  tickLine={false}
                 />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} />
-                <Tooltip contentStyle={{ borderRadius: '8px' }} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }} />
-                {(Object.entries(historicalData.bySede) as [string, HistoricalPeriodStats[]][]).map(([sede, s], idx) => (
-                  <Line 
-                    key={sede} 
-                    data={s} 
-                    type="monotone" 
-                    dataKey="confiabilidad" 
-                    name={sede} 
-                    stroke={[
-                      '#2F80ED', '#27AE60', '#F2C94C', '#EB5757', '#9B51E0', '#2D9CDB', '#F2994A'
-                    ][idx % 7]} 
-                    strokeWidth={2} 
-                    dot={{ r: 3 }} 
+                <YAxis 
+                  domain={[0, 100]} 
+                  tick={{ fontSize: 10, fill: '#7A8899' }} 
+                  axisLine={false} 
+                  tickLine={false}
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #C4973A', background: '#0F2044', color: '#fff' }}
+                  formatter={(value: any) => [`${value}%`, '']}
+                  labelStyle={{ color: '#C4973A', fontWeight: 700 }}
+                />
+                <Legend 
+                  iconType="square" 
+                  wrapperStyle={{ paddingTop: '16px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase' }} 
+                />
+                {(Object.keys(historicalData.bySede)).map((sede, idx) => (
+                  <Bar
+                    key={sede}
+                    dataKey={sede}
+                    name={sede}
+                    fill={['#1B4F8A', '#1A7A4A', '#C4973A', '#8B1A1A', '#6B3FA0', '#2D9CDB', '#B87333'][idx % 7]}
+                    radius={[4, 4, 0, 0]}
+                    barSize={28}
                   />
                 ))}
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

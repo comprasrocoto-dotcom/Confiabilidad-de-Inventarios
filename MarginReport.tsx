@@ -322,7 +322,7 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ background: '#F0F3F7' }}>
-                {['Sede', 'CC', 'Artículo', 'Unidad', 'Stock Fecha', 'Margen 2.5%', 'Diferencia', '% Dif/Stock', 'Excedente', 'Cobro 2.5%', 'Cobro Anterior', 'Δ Cobro', 'Acción'].map((h, i) => (
+                {['Sede', 'CC', 'Artículo', 'Unidad', 'Stock Fecha', 'Stock Inv.', 'Margen', 'Diferencia', '% Dif/Stock', 'Excedente', 'Precio Unit.', 'Cobro 2.5%', 'Cobro Anterior', 'Acción'].map((h, i) => (
                   <th key={i} style={{ padding: '10px 12px', textAlign: i > 3 ? 'center' : 'left', fontSize: 9, fontWeight: 700, color: NAV, textTransform: 'uppercase', borderBottom: '2px solid #C8D4E0', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -337,19 +337,18 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
                     <td style={{ padding: '8px 12px', fontWeight: 600, color: NAV, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.articulo}>{a.articulo}</td>
                     <td style={{ padding: '8px 12px', color: '#4A5568', fontSize: 11 }}>{a.subarticulo}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center' }}>{fmtNum(a.stockFecha, 1)}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center', color: '#4A5568' }}>{fmtNum((a as any).stockInventario ?? 0, 1)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: BLUE, fontWeight: 700 }}>
-                      {a.margenTipo === 'PORCENTAJE' ? fmtNum(a.margenAplicado, 2) : '—'}
+                      {a.margenTipo === 'PORCENTAJE' ? `${fmtNum(a.margenAplicado, 2)} (2.5%)` : a.margenTipo === 'FIJO' ? `±${fmtNum(a.margenAplicado, 0)} oz` : `±1`}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: RED, fontWeight: 700 }}>{fmtNum(a.absDiff, 2)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: a.pctDiferencia > 2.5 ? RED : GREEN, fontWeight: 700 }}>{fmtNum(a.pctDiferencia, 2)}%</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: a.excedente > 0 ? RED : '#9CA3AF', fontWeight: a.excedente > 0 ? 700 : 400 }}>
                       {a.excedente > 0 ? fmtNum(a.excedente, 2) : '—'}
                     </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: BLUE }}>{fmt(a.ultimoCoste || a.costePromedio)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: a.debeCobrar ? RED : '#9CA3AF' }}>{a.totalCobro > 0 ? fmt(a.totalCobro) : '—'}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'center', color: '#9CA3AF', fontSize: 11, textDecoration: deltaCobro < 0 ? 'line-through' : 'none' }}>{a.cobroOld > 0 ? fmt(a.cobroOld) : '—'}</td>
-                    <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 700, color: deltaCobro < 0 ? GREEN : deltaCobro > 0 ? RED : '#9CA3AF' }}>
-                      {deltaCobro !== 0 ? fmt(deltaCobro) : '—'}
-                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center', color: '#9CA3AF', fontSize: 11, textDecoration: a.debeCobrar !== a.cobrableOld ? 'line-through' : 'none' }}>{a.cobroOld > 0 ? fmt(a.cobroOld) : '—'}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                       {a.debeCobrar
                         ? <Pill color={RED} bg="#FEF2F2" border={`${RED}20`}>Cobra</Pill>
