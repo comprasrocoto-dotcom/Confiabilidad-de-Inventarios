@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { FileUpload } from './components/FileUpload';
-import { Filters } from './components/Filters';
-import { InventoryTable } from './components/InventoryTable';
-import { ReliabilityView } from './components/ReliabilityView';
-import { ManagementAnalysis } from './components/ManagementAnalysis';
-import { ExportButtons } from './components/ExportButtons';
-import { StatsCard } from './components/StatsCard';
+import { FileUpload } from './FileUpload';
+import { Filters } from './Filters';
+import { InventoryTable } from './InventoryTable';
+import { ReliabilityView } from './ReliabilityView';
+import { ManagementAnalysis } from './ManagementAnalysis';
+import { ExportButtons } from './ExportButtons';
+import { StatsCard } from './StatsCard';
 import { ArticleSummary } from './types';
-import { getDashboardStats } from './utils/inventory';
+import { getDashboardStats } from './inventory';
 import { 
   LayoutDashboard, 
   BarChart2, 
@@ -22,10 +22,10 @@ import {
   Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HistoricalTraceability } from './components/HistoricalTraceability';
-import { InventoryBarReport } from './components/InventoryBarReport';
-import { usePreloadedInventory } from './hooks/usePreloadedInventory';
-import { MarginReport } from './components/MarginReport';
+import { HistoricalTraceability } from './HistoricalTraceability';
+import { InventoryBarReport } from './InventoryBarReport';
+import { usePreloadedInventory } from './usePreloadedInventory';
+import { MarginReport } from './MarginReport';
 
 type Tab = 'RESUMEN' | 'ANÁLISIS' | 'COBROS' | 'CONFIABILIDAD' | 'GERENCIAL' | 'TRAZABILIDAD' | 'INFORME' | 'MÁRGENES';
 
@@ -40,12 +40,12 @@ export default function App() {
 
   // Auto-load the preloaded database on startup
   useEffect(() => {
-    if (preloaded.articles.length > 0 && articles.length === 0) {
+    if (!preloaded.loading && preloaded.articles.length > 0 && articles.length === 0) {
       setArticles(preloaded.articles);
       setFileName(preloaded.fileName);
       setUsingPreloaded(true);
     }
-  }, [preloaded.articles]);
+  }, [preloaded.loading, preloaded.articles]);
 
   const [filters, setFilters] = useState({
     sede: '',
@@ -83,6 +83,26 @@ export default function App() {
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
 
   const renderContent = () => {
+    // Loading state while Excel loads from repo
+    if (preloaded.loading) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <div className="p-8 rounded-full" style={{background: '#EEF4FF'}}>
+            <Database className="w-16 h-16 opacity-40" style={{color: '#1B4F8A'}} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-1" style={{color: '#0F2044'}}>Cargando Base de Datos...</h2>
+            <p className="text-sm" style={{color: '#4A5568'}}>Leyendo <strong>BASE_DE_DATOS_COBROS.xlsx</strong> del repositorio</p>
+          </div>
+          <div className="flex gap-1">
+            {[0,1,2].map(i => (
+              <div key={i} className="w-2 h-2 rounded-full animate-bounce" style={{background: '#C4973A', animationDelay: `${i * 0.15}s`}} />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     if (articles.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
@@ -281,7 +301,7 @@ export default function App() {
                   <>
                     <p className="text-xs font-bold uppercase" style={{color: '#C4973A'}}>Base de Datos</p>
                     <p className="text-xs font-bold text-emerald-400 flex items-center gap-1">
-                      <Database className="w-3 h-3" /> BD Repositorio · {articles.length} registros
+                      <Database className="w-3 h-3" /> BASE_DE_DATOS_COBROS.xlsx · {articles.length} registros
                     </p>
                   </>
                 ) : (

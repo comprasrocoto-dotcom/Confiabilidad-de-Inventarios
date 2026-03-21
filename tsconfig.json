@@ -13,6 +13,6 @@
     "jsx": "react-jsx",
     "allowJs": true
   },
-  "include": ["src"],
+  "include": ["./*.tsx", "./*.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
