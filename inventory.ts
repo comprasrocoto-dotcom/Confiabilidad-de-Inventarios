@@ -297,15 +297,17 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
         debeCobrar = absDiff > 1;
       }
     } else if (unit.includes('ONZA')) {
-      // ONZA: margen fijo ±2 oz (positivo o negativo)
+      // ONZA: margen ±2 oz — cobra solo si FALTANTE y supera 2 oz
+      // Si está 2 oz o menos por encima o por debajo: dentro del margen
       margenTipo = 'FIJO';
       margenAplicado = 2;
       margenPct = 0;
-      if (summary.tipo === 'FALTANTE') {
-        debeCobrar = absDiff > 2;
+      if (summary.tipo === 'FALTANTE' && absDiff > 2) {
+        debeCobrar = true; // negativo y supera 2 oz → cobra
       }
+      // Sobrante de onzas: nunca cobra (dentro del margen positivo)
     } else {
-      // Gramos y demás: Margen del 2.5% sobre el stock a fecha (solo negativos)
+      // GRAMOS: 2.5% del stock a fecha — SOLO cobra si diferencia es NEGATIVA (FALTANTE)
       const margenPorcentual = Math.max(Math.abs(ultimoStock) * 0.025, 1);
       margenAplicado = margenPorcentual;
       margenTipo = 'PORCENTAJE';
@@ -484,8 +486,14 @@ export function getHistoricalTraceability(
       let debeCobrar = false;
       if (tipo === 'FALTANTE') {
         const unit = art.subarticulo;
-        if (unit.includes('GRAMO')) debeCobrar = absDiff > 1000;
-        else if (unit.includes('ONZA') || unit.includes('COPA')) debeCobrar = absDiff > 2; // Margen ±2 oz
+        if (unit.includes('GRAMO')) {
+          // GRAMOS: 2.5% del stock a fecha, solo si es negativo (FALTANTE)
+          const stockRef = Math.abs(movements[movements.length - 1]?.stockFecha ?? 0);
+          const margen25 = Math.max(stockRef * 0.025, 1);
+          debeCobrar = absDiff > margen25;
+        }
+        else if (unit.includes('ONZA')) debeCobrar = absDiff > 2; // ±2 oz solo negativo
+        else if (unit.includes('COPA')) debeCobrar = absDiff > 1;
         else if (unit.includes('UNIDAD')) debeCobrar = absDiff > 1;
         else debeCobrar = absDiff > 1;
       }
