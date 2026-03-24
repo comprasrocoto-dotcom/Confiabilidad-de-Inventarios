@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { FileUpload } from './FileUpload';
 import { Filters } from './Filters';
 import { InventoryTable } from './InventoryTable';
 import { ReliabilityView } from './ReliabilityView';
@@ -112,7 +111,7 @@ export default function App() {
           <div>
             <h2 className="text-2xl font-bold text-[#1F3A5F] mb-2">No hay datos cargados</h2>
             <p className="text-slate-500 max-w-md mx-auto">
-              Utiliza el botón <span className="font-bold text-[#2F80ED]">Cargar Excel</span> en la esquina superior derecha para comenzar el análisis de inventarios.
+              Los datos se cargan automáticamente desde el repositorio.
             </p>
           </div>
         </div>
@@ -282,17 +281,7 @@ export default function App() {
         </div>
         
         <div className="flex items-center gap-6">
-          <FileUpload 
-            onDataLoaded={(data) => { setArticles(data); setUsingPreloaded(false); }} 
-            onReset={() => {
-              // On reset, reload the preloaded database
-              setArticles(preloaded.articles);
-              setFileName(preloaded.fileName);
-              setUsingPreloaded(true);
-            }}
-            onFileNameChange={(name) => setFileName(name)}
-            hasData={articles.length > 0}
-          />
+
           {articles.length > 0 && (
             <>
               <div className="h-8 w-px bg-white/10"></div>
