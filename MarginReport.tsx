@@ -332,7 +332,7 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ background: '#F0F3F7' }}>
-                {['Sede', 'CC', 'Artículo', 'Unidad', 'Stock Fecha', 'Stock Inv.', 'Margen', 'Diferencia', '% Dif/Stock', 'Excedente', 'Precio Unit.', 'Cobro 2.5%', 'Cobro Anterior', 'Acción'].map((h, i) => (
+                {['Artículo', 'Unidad', 'Stock Fecha', 'Stock Inv.', 'Margen', 'Diferencia', '% Dif/Stock', 'Excedente', 'Precio Unit.', 'Cobro 2.5%', 'Cobro Anterior', 'Acción'].map((h, i) => (
                   <th key={i} style={{ padding: '10px 12px', textAlign: i > 3 ? 'center' : 'left', fontSize: 9, fontWeight: 700, color: NAV, textTransform: 'uppercase', borderBottom: '2px solid #C8D4E0', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -342,9 +342,7 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
                 const deltaCobro = a.totalCobro - a.cobroOld;
                 return (
                   <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#F5F8FC', borderBottom: '1px solid #E8EFF8' }}>
-                    <td style={{ padding: '8px 12px', fontWeight: 600, color: NAV, fontSize: 11, whiteSpace: 'nowrap' }}>{a.sede}</td>
-                    <td style={{ padding: '8px 12px', color: '#4A5568', fontSize: 11 }}>{a.cc}</td>
-                    <td style={{ padding: '8px 12px', fontWeight: 600, color: NAV, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.articulo}>{a.articulo}</td>
+                    <td style={{ padding: '8px 12px', fontWeight: 600, color: NAV, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`${a.sede} · ${a.cc} — ${a.articulo}`}>{a.articulo}</td>
                     <td style={{ padding: '8px 12px', color: '#4A5568', fontSize: 11 }}>{a.subarticulo}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center' }}>{fmtNum(a.stockFecha, 1)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: '#4A5568' }}>{fmtNum((a as any).stockInventario ?? 0, 1)}</td>
