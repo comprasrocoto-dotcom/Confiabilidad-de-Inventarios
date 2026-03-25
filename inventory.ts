@@ -289,7 +289,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
     const unit = summary.subarticulo;
 
     if (unit.includes('UNIDAD') || unit.includes('COPA')) {
-      // SIN margen de error — cualquier faltante >= 1 genera cobro
+      // SIN margen de error — cualquier faltante >= 1 genera cobro inmediato
       margenTipo = 'EXENTO';
       margenAplicado = 0; // sin margen
       margenPct = 0;
@@ -308,7 +308,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
       // Sobrante de onzas: nunca cobra (dentro del margen positivo)
     } else {
       // GRAMOS: 2.5% del stock a fecha — SOLO cobra si diferencia es NEGATIVA (FALTANTE)
-      const margenPorcentual = Math.abs(ultimoStock) * 0.025; // 2.5% puro sin piso
+      const margenPorcentual = Math.abs(ultimoStock) * 0.025; // 2.5% puro
       margenAplicado = margenPorcentual;
       margenTipo = 'PORCENTAJE';
       margenPct = 2.5;
@@ -371,16 +371,12 @@ export function getReliabilitySummary(articles: ArticleSummary[], groupBy: 'sede
 
   const sedesStats: ReliabilityStats[] = Array.from(entityMap.entries()).map(([entityName, arts]) => {
     const articulosEvaluados = arts.length;
-    // Confiabilidad ajustada: artículos dentro del margen tolerado (no generan cobro)
-    // Incluye: diferencia=0 + diferencia dentro del margen (ONZA ±2oz, GRAMOS 2.5%, UNIDAD ±1)
-    const articulosDentroMargen = arts.filter(a => !a.debeCobrar).length;
-    const articulosSinDiferencia = articulosDentroMargen; // alias para compatibilidad
-    const articulosConDiferencia = articulosEvaluados - articulosDentroMargen;
-    const confiabilidad = articulosEvaluados > 0 ? (articulosDentroMargen / articulosEvaluados) * 100 : 0;
+    const articulosSinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
+    const articulosConDiferencia = articulosEvaluados - articulosSinDiferencia;
+    const confiabilidad = articulosEvaluados > 0 ? (articulosSinDiferencia / articulosEvaluados) * 100 : 0;
     
     const variacionTotal = arts.reduce((acc, a) => acc + a.totalDiferencia, 0);
-    // Impacto económico = solo artículos que superan el margen (cobros reales)
-    const impactoEconomico = arts.reduce((acc, a) => acc + a.totalCobro, 0);
+    const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);
 
     let nivel: ReliabilityStats['nivel'] = 'Crítico';
     if (confiabilidad >= 85) nivel = 'Confiable';
@@ -493,7 +489,7 @@ export function getHistoricalTraceability(
         if (unit.includes('GRAMO')) {
           // GRAMOS: 2.5% del stock a fecha, solo si es negativo (FALTANTE)
           const stockRef = Math.abs(movements[movements.length - 1]?.stockFecha ?? 0);
-          const margen25 = stockRef * 0.025; // 2.5% puro sin piso
+          const margen25 = stockRef * 0.025; // 2.5% puro
           debeCobrar = absDiff > margen25;
         }
         else if (unit.includes('ONZA')) debeCobrar = absDiff > 2; // ±2 oz solo negativo
@@ -529,8 +525,7 @@ export function getHistoricalTraceability(
 
   const calculateStats = (arts: ArticleSummary[], periodKey: string): HistoricalPeriodStats => {
     const evaluados = arts.length;
-    // Confiabilidad ajustada: dentro del margen tolerado (no generan cobro)
-    const sinDiferencia = arts.filter(a => !a.debeCobrar).length;
+    const sinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
     const conDiferencia = evaluados - sinDiferencia;
     const confiabilidad = evaluados > 0 ? (sinDiferencia / evaluados) * 100 : 0;
     const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);

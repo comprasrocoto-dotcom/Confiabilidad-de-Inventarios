@@ -78,7 +78,7 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       if (showOnlyFaltantes) return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Faltantes') return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Sobrantes') return a.totalDiferencia > 0.0001;
-      if (modalFilter === 'Sin diferencia') return !a.debeCobrar; // dentro del margen tolerado
+      if (modalFilter === 'Sin diferencia') return Math.abs(a.totalDiferencia) < 0.0001;
       return true;
     });
 
@@ -116,8 +116,7 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
         if (items.length === 0) {
           row[cc] = null;
         } else {
-          // Confiabilidad ajustada al margen: artículos que NO generan cobro
-          const sinDif = items.filter(a => !a.debeCobrar).length;
+          const sinDif = items.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
           const reliability = (sinDif / items.length) * 100;
           row[cc] = {
             reliability,
@@ -339,13 +338,12 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       stats.evaluados++;
       stats.items.push(a);
       const diff = Math.abs(a.totalDiferencia);
-      if (!a.debeCobrar) {
-        // Dentro del margen tolerado (ONZA ±2oz, GRAMOS 2.5%, UNIDAD ±1)
+      if (diff < 0.0001) {
         stats.sinDiferencia++;
       } else {
         stats.conDiferencia++;
       }
-      stats.impacto += a.totalCobro; // solo cobros reales
+      stats.impacto += diff * (a.ultimoCoste || a.costePromedio);
     });
 
     const ccStatsArray = Array.from(ccStatsMap.entries()).map(([cc, stats]) => {
@@ -1599,21 +1597,13 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
                       {filteredItems.length > 0 && (
                         <tfoot>
                           <tr className="bg-[#0F2044]">
-                            <td colSpan={2} className="px-4 py-3 text-xs font-bold text-white uppercase tracking-wider">
+                            <td colSpan={4} className="px-4 py-3 text-xs font-bold text-white uppercase tracking-wider">
                               TOTAL — {filteredItems.length} artículos
-                            </td>
-                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-300">
-                              {filteredItems.reduce((acc,a) => acc+(a.stockFecha??0),0).toLocaleString('es-CO',{maximumFractionDigits:1})}
-                            </td>
-                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-300">
-                              {filteredItems.reduce((acc,a) => acc+(a.stockInventario??0),0).toLocaleString('es-CO',{maximumFractionDigits:1})}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-rose-400 text-xs">
                               {filteredItems.reduce((acc, a) => acc + a.totalDiferencia, 0).toFixed(2)}
                             </td>
-                            <td className="px-4 py-3 text-right text-[10px] font-bold text-[#C4973A]">
-                              {formatCurrency(filteredItems.reduce((acc,a) => acc+(a.ultimoCoste||a.costePromedio),0)/filteredItems.length)}
-                            </td>
+                            <td className="px-4 py-3"></td>
                             <td className="px-4 py-3 text-right font-bold text-[#C4973A] text-sm">
                               {formatCurrency(filteredItems.reduce((acc, a) => acc + Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio), 0))}
                             </td>
