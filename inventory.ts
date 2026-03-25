@@ -289,12 +289,12 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
     const unit = summary.subarticulo;
 
     if (unit.includes('UNIDAD') || unit.includes('COPA')) {
-      // EXENTO del margen porcentual — margen fijo de 1 unidad
+      // SIN margen de error — cualquier faltante >= 1 genera cobro
       margenTipo = 'EXENTO';
-      margenAplicado = 1;
+      margenAplicado = 0; // sin margen
       margenPct = 0;
       if (summary.tipo === 'FALTANTE') {
-        debeCobrar = absDiff > 1;
+        debeCobrar = absDiff >= 1; // cobra desde 1 unidad/copa faltante
       }
     } else if (unit.includes('ONZA')) {
       // ONZA: margen ±2 oz — cobra solo si FALTANTE y supera 2 oz
@@ -497,8 +497,8 @@ export function getHistoricalTraceability(
           debeCobrar = absDiff > margen25;
         }
         else if (unit.includes('ONZA')) debeCobrar = absDiff > 2; // ±2 oz solo negativo
-        else if (unit.includes('COPA')) debeCobrar = absDiff > 1;
-        else if (unit.includes('UNIDAD')) debeCobrar = absDiff > 1;
+        else if (unit.includes('COPA')) debeCobrar = absDiff >= 1; // sin margen
+        else if (unit.includes('UNIDAD')) debeCobrar = absDiff >= 1; // sin margen
         else debeCobrar = absDiff > 1;
       }
 

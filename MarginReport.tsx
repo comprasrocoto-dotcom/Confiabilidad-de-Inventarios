@@ -347,7 +347,7 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
                     <td style={{ padding: '8px 12px', textAlign: 'center' }}>{fmtNum(a.stockFecha, 1)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: '#4A5568' }}>{fmtNum((a as any).stockInventario ?? 0, 1)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: BLUE, fontWeight: 700 }}>
-                      {a.margenTipo === 'PORCENTAJE' ? `${fmtNum(a.margenAplicado, 2)} (2.5%)` : a.margenTipo === 'FIJO' ? `±${fmtNum(a.margenAplicado, 0)} oz` : `±1`}
+                      {a.margenTipo === 'PORCENTAJE' ? `${fmtNum(a.margenAplicado, 2)} (2.5%)` : a.margenTipo === 'FIJO' ? `±${fmtNum(a.margenAplicado, 0)} oz` : 'Sin margen'}
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: RED, fontWeight: 700 }}>{fmtNum(a.absDiff, 2)}</td>
                     <td style={{ padding: '8px 12px', textAlign: 'center', color: a.pctDiferencia > 2.5 ? RED : GREEN, fontWeight: 700 }}>{fmtNum(a.pctDiferencia, 2)}%</td>
