@@ -371,12 +371,16 @@ export function getReliabilitySummary(articles: ArticleSummary[], groupBy: 'sede
 
   const sedesStats: ReliabilityStats[] = Array.from(entityMap.entries()).map(([entityName, arts]) => {
     const articulosEvaluados = arts.length;
-    const articulosSinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
-    const articulosConDiferencia = articulosEvaluados - articulosSinDiferencia;
-    const confiabilidad = articulosEvaluados > 0 ? (articulosSinDiferencia / articulosEvaluados) * 100 : 0;
+    // Confiabilidad ajustada: artículos dentro del margen tolerado (no generan cobro)
+    // Incluye: diferencia=0 + diferencia dentro del margen (ONZA ±2oz, GRAMOS 2.5%, UNIDAD ±1)
+    const articulosDentroMargen = arts.filter(a => !a.debeCobrar).length;
+    const articulosSinDiferencia = articulosDentroMargen; // alias para compatibilidad
+    const articulosConDiferencia = articulosEvaluados - articulosDentroMargen;
+    const confiabilidad = articulosEvaluados > 0 ? (articulosDentroMargen / articulosEvaluados) * 100 : 0;
     
     const variacionTotal = arts.reduce((acc, a) => acc + a.totalDiferencia, 0);
-    const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);
+    // Impacto económico = solo artículos que superan el margen (cobros reales)
+    const impactoEconomico = arts.reduce((acc, a) => acc + a.totalCobro, 0);
 
     let nivel: ReliabilityStats['nivel'] = 'Crítico';
     if (confiabilidad >= 85) nivel = 'Confiable';
@@ -525,7 +529,8 @@ export function getHistoricalTraceability(
 
   const calculateStats = (arts: ArticleSummary[], periodKey: string): HistoricalPeriodStats => {
     const evaluados = arts.length;
-    const sinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
+    // Confiabilidad ajustada: dentro del margen tolerado (no generan cobro)
+    const sinDiferencia = arts.filter(a => !a.debeCobrar).length;
     const conDiferencia = evaluados - sinDiferencia;
     const confiabilidad = evaluados > 0 ? (sinDiferencia / evaluados) * 100 : 0;
     const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);

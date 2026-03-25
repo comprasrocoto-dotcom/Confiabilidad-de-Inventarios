@@ -78,7 +78,7 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       if (showOnlyFaltantes) return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Faltantes') return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Sobrantes') return a.totalDiferencia > 0.0001;
-      if (modalFilter === 'Sin diferencia') return Math.abs(a.totalDiferencia) < 0.0001;
+      if (modalFilter === 'Sin diferencia') return !a.debeCobrar; // dentro del margen tolerado
       return true;
     });
 
@@ -116,7 +116,8 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
         if (items.length === 0) {
           row[cc] = null;
         } else {
-          const sinDif = items.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
+          // Confiabilidad ajustada al margen: artículos que NO generan cobro
+          const sinDif = items.filter(a => !a.debeCobrar).length;
           const reliability = (sinDif / items.length) * 100;
           row[cc] = {
             reliability,
@@ -338,12 +339,13 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       stats.evaluados++;
       stats.items.push(a);
       const diff = Math.abs(a.totalDiferencia);
-      if (diff < 0.0001) {
+      if (!a.debeCobrar) {
+        // Dentro del margen tolerado (ONZA ±2oz, GRAMOS 2.5%, UNIDAD ±1)
         stats.sinDiferencia++;
       } else {
         stats.conDiferencia++;
       }
-      stats.impacto += diff * (a.ultimoCoste || a.costePromedio);
+      stats.impacto += a.totalCobro; // solo cobros reales
     });
 
     const ccStatsArray = Array.from(ccStatsMap.entries()).map(([cc, stats]) => {
