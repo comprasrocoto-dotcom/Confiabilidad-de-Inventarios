@@ -271,6 +271,16 @@ export const MarginReport: React.FC<MarginReportProps> = ({ data }) => {
                       ))}
                     </tbody>
                   </table>
+                  <tfoot>
+                    <tr style={{background:'#0F2044'}}>
+                      <td colSpan={4} style={{padding:'8px 12px',color:'#C4973A',fontWeight:700,fontSize:11,textTransform:'uppercase'}}>
+                        Faltantes: {s.arts.filter(a=>a.tipo==='FALTANTE').length} | Cobrables: {s.arts.filter(a=>a.debeCobrar).length}
+                      </td>
+                      <td style={{padding:'8px 12px',textAlign:'right',fontWeight:800,color:'white',fontSize:13}}>
+                        {fmt(s.arts.reduce((acc,a)=>acc+a.totalCobro,0))}
+                      </td>
+                    </tr>
+                  </tfoot>
                 </div>
               </div>
             )}

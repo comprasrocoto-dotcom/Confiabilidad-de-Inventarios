@@ -1597,13 +1597,21 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
                       {filteredItems.length > 0 && (
                         <tfoot>
                           <tr className="bg-[#0F2044]">
-                            <td colSpan={4} className="px-4 py-3 text-xs font-bold text-white uppercase tracking-wider">
+                            <td colSpan={2} className="px-4 py-3 text-xs font-bold text-white uppercase tracking-wider">
                               TOTAL — {filteredItems.length} artículos
+                            </td>
+                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-300">
+                              {filteredItems.reduce((acc,a) => acc+(a.stockFecha??0),0).toLocaleString('es-CO',{maximumFractionDigits:1})}
+                            </td>
+                            <td className="px-4 py-3 text-right text-[10px] font-bold text-slate-300">
+                              {filteredItems.reduce((acc,a) => acc+(a.stockInventario??0),0).toLocaleString('es-CO',{maximumFractionDigits:1})}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-rose-400 text-xs">
                               {filteredItems.reduce((acc, a) => acc + a.totalDiferencia, 0).toFixed(2)}
                             </td>
-                            <td className="px-4 py-3"></td>
+                            <td className="px-4 py-3 text-right text-[10px] font-bold text-[#C4973A]">
+                              {formatCurrency(filteredItems.reduce((acc,a) => acc+(a.ultimoCoste||a.costePromedio),0)/filteredItems.length)}
+                            </td>
                             <td className="px-4 py-3 text-right font-bold text-[#C4973A] text-sm">
                               {formatCurrency(filteredItems.reduce((acc, a) => acc + Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio), 0))}
                             </td>

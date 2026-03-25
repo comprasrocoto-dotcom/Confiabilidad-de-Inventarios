@@ -11,7 +11,6 @@ import {
   ResponsiveContainer, 
   Cell,
   ReferenceLine,
-  ScatterChart,
   Scatter,
   ZAxis
 } from 'recharts';
@@ -108,7 +107,7 @@ export const ManagementAnalysis: React.FC<ManagementAnalysisProps> = ({ data, se
     return [...filteredData]
       .filter(a => a.totalDiferencia > 0.0001)
       .sort((a, b) => (b.totalDiferencia * (b.ultimoCoste || b.costePromedio)) - (a.totalDiferencia * (a.ultimoCoste || a.costePromedio)))
-      .slice(0, 5);
+      .slice(0, 15);
   }, [filteredData]);
 
   const topLossesProducts = useMemo(() => {
@@ -354,7 +353,7 @@ export const ManagementAnalysis: React.FC<ManagementAnalysisProps> = ({ data, se
         <div className="p-6 border-b border-[#D6DEE6] bg-[#F5F7FA] flex items-center gap-2">
           <TrendingDown className="w-5 h-5 text-[#EB5757]" />
           <h3 className="font-bold text-[#1F3A5F] uppercase tracking-tight">
-            {selectedSede ? `Top Impacto Económico en ${selectedSede}` : 'Top 5 Sedes con Mayor Impacto Económico (Pérdida)'}
+            {selectedSede ? `Top Impacto Económico en ${selectedSede}` : 'Top 5 Sedes con Mayor Impacto'}
           </h3>
         </div>
         <div className="overflow-x-auto">
@@ -492,26 +491,6 @@ export const ManagementAnalysis: React.FC<ManagementAnalysisProps> = ({ data, se
           </div>
         </div>
       </div>
-
-      {/* Problematic Products Section */}
-      <div className="space-y-8">
-        <div className="bg-[#1F3A5F] text-white p-8 rounded-[12px] shadow-lg relative overflow-hidden">
-          <div className="relative z-10">
-            <h2 className="text-2xl font-bold mb-2 uppercase tracking-tight">
-              Productos con Mayor Riesgo Operativo {selectedSede ? `— ${selectedSede}` : ''}
-            </h2>
-            <p className="text-[#A7C4E0] font-medium">
-              {selectedSede ? `Análisis de criticidad para ${selectedSede}` : 'Artículos con mayor impacto en diferencias de inventario'}
-            </p>
-          </div>
-          <div className="absolute right-0 top-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-            <ShieldAlert className="w-64 h-64" />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-[12px] border border-[#D6DEE6] shadow-sm overflow-hidden w-full">
-            
-        </div>
 
 
       {/* Ranking Riesgo Operativo — Full Width */}

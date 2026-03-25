@@ -308,7 +308,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
       // Sobrante de onzas: nunca cobra (dentro del margen positivo)
     } else {
       // GRAMOS: 2.5% del stock a fecha — SOLO cobra si diferencia es NEGATIVA (FALTANTE)
-      const margenPorcentual = Math.max(Math.abs(ultimoStock) * 0.025, 1);
+      const margenPorcentual = Math.abs(ultimoStock) * 0.025; // 2.5% puro sin piso
       margenAplicado = margenPorcentual;
       margenTipo = 'PORCENTAJE';
       margenPct = 2.5;
@@ -489,7 +489,7 @@ export function getHistoricalTraceability(
         if (unit.includes('GRAMO')) {
           // GRAMOS: 2.5% del stock a fecha, solo si es negativo (FALTANTE)
           const stockRef = Math.abs(movements[movements.length - 1]?.stockFecha ?? 0);
-          const margen25 = Math.max(stockRef * 0.025, 1);
+          const margen25 = stockRef * 0.025; // 2.5% puro sin piso
           debeCobrar = absDiff > margen25;
         }
         else if (unit.includes('ONZA')) debeCobrar = absDiff > 2; // ±2 oz solo negativo
