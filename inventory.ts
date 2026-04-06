@@ -289,12 +289,12 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
     const unit = summary.subarticulo;
 
     if (unit.includes('UNIDAD') || unit.includes('COPA')) {
-      // SIN margen de error — cualquier faltante >= 1 genera cobro inmediato
+      // SIN margen — cualquier faltante >= 1 cobra
       margenTipo = 'EXENTO';
-      margenAplicado = 0; // sin margen
+      margenAplicado = 0;
       margenPct = 0;
       if (summary.tipo === 'FALTANTE') {
-        debeCobrar = absDiff >= 1; // cobra desde 1 unidad/copa faltante
+        debeCobrar = absDiff >= 1;
       }
     } else if (unit.includes('ONZA')) {
       // ONZA: margen ±2 oz — cobra solo si FALTANTE y supera 2 oz
@@ -308,7 +308,7 @@ export function normalizeData(rawRows: RawInventoryRow[]): { articles: ArticleSu
       // Sobrante de onzas: nunca cobra (dentro del margen positivo)
     } else {
       // GRAMOS: 2.5% del stock a fecha — SOLO cobra si diferencia es NEGATIVA (FALTANTE)
-      const margenPorcentual = Math.abs(ultimoStock) * 0.025; // 2.5% puro
+      const margenPorcentual = Math.abs(ultimoStock) * 0.025;
       margenAplicado = margenPorcentual;
       margenTipo = 'PORCENTAJE';
       margenPct = 2.5;
@@ -371,12 +371,14 @@ export function getReliabilitySummary(articles: ArticleSummary[], groupBy: 'sede
 
   const sedesStats: ReliabilityStats[] = Array.from(entityMap.entries()).map(([entityName, arts]) => {
     const articulosEvaluados = arts.length;
-    const articulosSinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
-    const articulosConDiferencia = articulosEvaluados - articulosSinDiferencia;
-    const confiabilidad = articulosEvaluados > 0 ? (articulosSinDiferencia / articulosEvaluados) * 100 : 0;
+    // Confiabilidad ajustada: artículo confiable = no genera cobro (dentro del margen)
+    const articulosDentroMargen = arts.filter(a => !a.debeCobrar).length;
+    const articulosSinDiferencia = articulosDentroMargen;
+    const articulosConDiferencia = articulosEvaluados - articulosDentroMargen;
+    const confiabilidad = articulosEvaluados > 0 ? (articulosDentroMargen / articulosEvaluados) * 100 : 0;
     
     const variacionTotal = arts.reduce((acc, a) => acc + a.totalDiferencia, 0);
-    const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);
+    const impactoEconomico = arts.reduce((acc, a) => acc + a.totalCobro, 0);
 
     let nivel: ReliabilityStats['nivel'] = 'Crítico';
     if (confiabilidad >= 85) nivel = 'Confiable';
@@ -489,12 +491,12 @@ export function getHistoricalTraceability(
         if (unit.includes('GRAMO')) {
           // GRAMOS: 2.5% del stock a fecha, solo si es negativo (FALTANTE)
           const stockRef = Math.abs(movements[movements.length - 1]?.stockFecha ?? 0);
-          const margen25 = stockRef * 0.025; // 2.5% puro
+          const margen25 = stockRef * 0.025;
           debeCobrar = absDiff > margen25;
         }
         else if (unit.includes('ONZA')) debeCobrar = absDiff > 2; // ±2 oz solo negativo
-        else if (unit.includes('COPA')) debeCobrar = absDiff >= 1; // sin margen
-        else if (unit.includes('UNIDAD')) debeCobrar = absDiff >= 1; // sin margen
+        else if (unit.includes('COPA')) debeCobrar = absDiff >= 1;
+        else if (unit.includes('UNIDAD')) debeCobrar = absDiff >= 1;
         else debeCobrar = absDiff > 1;
       }
 
@@ -525,10 +527,11 @@ export function getHistoricalTraceability(
 
   const calculateStats = (arts: ArticleSummary[], periodKey: string): HistoricalPeriodStats => {
     const evaluados = arts.length;
-    const sinDiferencia = arts.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
+    // Confiabilidad ajustada al margen
+    const sinDiferencia = arts.filter(a => !a.debeCobrar).length;
     const conDiferencia = evaluados - sinDiferencia;
     const confiabilidad = evaluados > 0 ? (sinDiferencia / evaluados) * 100 : 0;
-    const impactoEconomico = arts.reduce((acc, a) => acc + (Math.abs(a.totalDiferencia) * (a.ultimoCoste || a.costePromedio)), 0);
+    const impactoEconomico = arts.reduce((acc, a) => acc + a.totalCobro, 0);
     const faltantes = arts.filter(a => a.tipo === 'FALTANTE').length;
     const sobrantes = arts.filter(a => a.tipo === 'SOBRANTE').length;
     const cobrables = arts.filter(a => a.debeCobrar).length;

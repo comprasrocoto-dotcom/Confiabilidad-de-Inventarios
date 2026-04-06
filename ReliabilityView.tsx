@@ -78,7 +78,7 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       if (showOnlyFaltantes) return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Faltantes') return a.totalDiferencia < -0.0001;
       if (modalFilter === 'Sobrantes') return a.totalDiferencia > 0.0001;
-      if (modalFilter === 'Sin diferencia') return Math.abs(a.totalDiferencia) < 0.0001;
+      if (modalFilter === 'Sin diferencia') return !a.debeCobrar;
       return true;
     });
 
@@ -116,7 +116,7 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
         if (items.length === 0) {
           row[cc] = null;
         } else {
-          const sinDif = items.filter(a => Math.abs(a.totalDiferencia) < 0.0001).length;
+          const sinDif = items.filter(a => !a.debeCobrar).length;
           const reliability = (sinDif / items.length) * 100;
           row[cc] = {
             reliability,
@@ -338,12 +338,12 @@ export const ReliabilityView: React.FC<ReliabilityViewProps> = ({ data, filters 
       stats.evaluados++;
       stats.items.push(a);
       const diff = Math.abs(a.totalDiferencia);
-      if (diff < 0.0001) {
+      if (!a.debeCobrar) {
         stats.sinDiferencia++;
       } else {
         stats.conDiferencia++;
       }
-      stats.impacto += diff * (a.ultimoCoste || a.costePromedio);
+      stats.impacto += a.totalCobro;
     });
 
     const ccStatsArray = Array.from(ccStatsMap.entries()).map(([cc, stats]) => {
