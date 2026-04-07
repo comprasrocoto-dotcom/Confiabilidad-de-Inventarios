@@ -1,15 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  root: '.',
-  assetsInclude: ['**/*.xlsx'],
-  build: {
-    outDir: 'dist',
-    rollupOptions: {
-      input: 'index.html'
-    }
-  }
+  publicDir: 'public',   // archivos aquí se sirven estáticamente, sin bundlear
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+    },
+  },
 });

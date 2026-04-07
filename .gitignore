@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Nunca ignorar el Excel de la base de datos
+!public/*.xlsx
+!*.xlsx
