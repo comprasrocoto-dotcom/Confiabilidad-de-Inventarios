@@ -1,14 +1,12 @@
-// Hook que lee el Excel desde la carpeta public/ del repositorio
-// Para actualizar la BD: reemplaza el archivo en GitLab → carpeta "public/"
-// El nombre del archivo debe ser exactamente: BASE DE DATOS COBROS.xlsx
 import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { normalizeData } from './inventory';
 import { ArticleSummary } from './types';
 
-// Vite sirve /public como raíz estática — no se bundlea, solo se sirve
-const EXCEL_URL = '/BASE DE DATOS COBROS.xlsx';
-const EXCEL_NAME = 'BASE DE DATOS COBROS.xlsx';
+// El Excel vive en /public/ y se sirve como archivo estático
+// Para actualizar: reemplaza public/base-datos-cobros.xlsx en GitLab
+const EXCEL_URL = '/base-datos-cobros.xlsx';
+const EXCEL_NAME = 'base-datos-cobros.xlsx';
 
 interface PreloadedResult {
   articles: ArticleSummary[];
@@ -29,7 +27,7 @@ export function usePreloadedInventory(): PreloadedResult {
     const loadExcel = async () => {
       try {
         const response = await fetch(EXCEL_URL);
-        if (!response.ok) throw new Error(`HTTP ${response.status} — no se encontró ${EXCEL_NAME}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
@@ -53,9 +51,7 @@ export function usePreloadedInventory(): PreloadedResult {
               newRow[fechaKey] = `${dd}/${mm}/${yyyy}`;
             } else if (typeof val === 'number') {
               const d = XLSX.SSF.parse_date_code(val);
-              const dd = String(d.d).padStart(2, '0');
-              const mm = String(d.m).padStart(2, '0');
-              newRow[fechaKey] = `${dd}/${mm}/${d.y}`;
+              newRow[fechaKey] = `${String(d.d).padStart(2,'0')}/${String(d.m).padStart(2,'0')}/${d.y}`;
             }
           }
           return newRow;
@@ -67,7 +63,7 @@ export function usePreloadedInventory(): PreloadedResult {
         console.error('Error cargando Excel:', err);
         setState(prev => ({
           ...prev,
-          errors: [`No se pudo cargar ${EXCEL_NAME}: ${err}`],
+          errors: [`Error cargando base de datos: ${err}`],
           loading: false
         }));
       }

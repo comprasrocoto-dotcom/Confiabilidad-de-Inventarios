@@ -6,20 +6,5 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)\\.xlsx",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-cache"
-        }
-      ]
-    }
   ]
 }
