@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { ArticleSummary } from './types';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell, Legend, ReferenceLine
+  ResponsiveContainer, Legend
 } from 'recharts';
-import { Info, TrendingDown, AlertTriangle, CheckCircle2, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Info, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MarginReportProps {
   data: ArticleSummary[];

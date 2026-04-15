@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { ArticleSummary, HistoricalPeriodStats, HistoricalTraceabilityData } from './types';
 import { getHistoricalTraceability } from './inventory';
 import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+  Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   ComposedChart, Area
 } from 'recharts';
 import { 
   TrendingUp, TrendingDown, Minus, Calendar, Building2, LayoutGrid, Package, 
-  AlertTriangle, CheckCircle2, DollarSign, Download, FileText, Table as TableIcon,
+  AlertTriangle, CheckCircle2, DollarSign, FileText, Table as TableIcon,
   ArrowUpRight, ArrowDownRight, Activity
 } from 'lucide-react';
 import { motion } from 'motion/react';

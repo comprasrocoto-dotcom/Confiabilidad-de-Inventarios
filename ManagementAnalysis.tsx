@@ -10,10 +10,7 @@ import {
   Tooltip, 
   ResponsiveContainer, 
   Cell,
-  ReferenceLine,
-  ScatterChart,
-  Scatter,
-  ZAxis
+  ReferenceLine
 } from 'recharts';
 import { 
   Trophy, 
@@ -24,8 +21,7 @@ import {
   Building2,
   ArrowRight,
   BarChart3,
-  ShieldAlert,
-  Activity
+  ShieldAlert
 } from 'lucide-react';
 import { motion } from 'motion/react';
 

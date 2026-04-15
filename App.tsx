@@ -14,7 +14,7 @@ import {
   ShieldCheck, 
   Package, 
   AlertTriangle, 
-  CheckCircle2, 
+  
   TrendingDown,
   BarChart3,
   Activity,

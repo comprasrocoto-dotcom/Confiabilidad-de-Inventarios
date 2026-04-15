@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArticleSummary, ReliabilitySummary, ReliabilityStats } from './types';
+import { ArticleSummary, ReliabilityStats } from './types';
 import { getReliabilitySummary } from './inventory';
 import { motion, AnimatePresence } from 'motion/react';
 import { jsPDF } from 'jspdf';
@@ -12,7 +12,7 @@ import {
   AlertTriangle, 
   DollarSign, 
   Building2, 
-  ChevronRight, 
+  
   ArrowRight,
   PieChart,
   BarChart3,

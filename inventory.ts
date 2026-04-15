@@ -1,5 +1,5 @@
 import { RawInventoryRow, ArticleSummary, SedeSummary, DashboardStats, InventoryMovement, ReliabilitySummary, ReliabilityStats, HistoricalPeriodStats, HistoricalTraceabilityData } from './types';
-import { parse, isValid, format, startOfMonth, startOfWeek, startOfDay, isWithinInterval, addMonths, subMonths } from 'date-fns';
+import { parse, isValid, format, startOfMonth, startOfWeek, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const EXACT_MOJIBAKE_MAP: Record<string, string> = {
