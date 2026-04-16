@@ -3,10 +3,11 @@ import * as XLSX from 'xlsx';
 import { normalizeData } from './inventory';
 import { ArticleSummary } from './types';
 
-// El Excel vive en /public/ y se sirve como archivo estático
-// Para actualizar: reemplaza public/base-datos-cobros.xlsx en GitLab
-const EXCEL_URL = '/base-datos-cobros.xlsx';
 const EXCEL_NAME = 'base-datos-cobros.xlsx';
+
+// Cache-busting: cada vez que carga la app obtiene el archivo más reciente
+// El timestamp fuerza al navegador y a Vercel CDN a descargar siempre la versión nueva
+const EXCEL_URL = `/base-datos-cobros.xlsx?v=${Date.now()}`;
 
 interface PreloadedResult {
   articles: ArticleSummary[];
@@ -26,7 +27,15 @@ export function usePreloadedInventory(): PreloadedResult {
   useEffect(() => {
     const loadExcel = async () => {
       try {
-        const response = await fetch(EXCEL_URL);
+        const response = await fetch(EXCEL_URL, {
+          // Fuerza al navegador a ignorar cualquier caché local
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          }
+        });
+
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const arrayBuffer = await response.arrayBuffer();
