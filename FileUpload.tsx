@@ -43,10 +43,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataLoaded, onReset, o
 
       const { articles, errors, debug: debugInfo } = normalizeData(json);
       
-      if (errors.length > 0) {
-        setError(errors[0]);
+      // Si no hay artículos en absoluto, mostrar error
+      if (articles.length === 0) {
+        setError(errors[0] || 'No se encontraron artículos en el archivo.');
         setLoading(false);
         return;
+      }
+      
+      // Si hay artículos pero también advertencias, continuar con advertencia
+      if (errors.length > 0) {
+        console.warn('Advertencias al cargar:', errors);
       }
 
       setFileInfo({

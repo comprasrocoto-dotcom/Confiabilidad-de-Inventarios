@@ -105,15 +105,34 @@ export default function App() {
     if (articles.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-          <div className="bg-blue-50 p-8 rounded-full">
-            <Package className="w-16 h-16 text-[#2F80ED] opacity-30" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-[#1F3A5F] mb-2">No hay datos cargados</h2>
-            <p className="text-slate-500 max-w-md mx-auto">
-              Los datos se cargan automáticamente desde el repositorio.
-            </p>
-          </div>
+          {preloaded.errors.length > 0 ? (
+            <>
+              <div className="p-8 rounded-full bg-red-50">
+                <Package className="w-16 h-16 text-red-400 opacity-60" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-red-700 mb-2">Error al cargar la base de datos</h2>
+                <p className="text-slate-600 max-w-lg mx-auto text-sm bg-red-50 p-4 rounded-lg border border-red-200">
+                  {preloaded.errors[0]}
+                </p>
+                <p className="text-slate-400 text-xs mt-3">
+                  Verifica que <strong>base-datos-cobros.xlsx</strong> esté en la carpeta <strong>public/</strong> del repositorio.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50 p-8 rounded-full">
+                <Package className="w-16 h-16 text-[#2F80ED] opacity-30" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[#1F3A5F] mb-2">No hay datos cargados</h2>
+                <p className="text-slate-500 max-w-md mx-auto">
+                  Los datos se cargan automáticamente desde el repositorio.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       );
     }

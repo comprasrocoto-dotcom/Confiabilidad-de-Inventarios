@@ -67,12 +67,17 @@ export function usePreloadedInventory(): PreloadedResult {
         });
 
         const { articles, errors } = normalizeData(normalizedRows);
+        if (articles.length === 0 && errors.length > 0) {
+          console.error('Error procesando Excel:', errors);
+        }
         setState({ articles, errors, fileName: EXCEL_NAME, loading: false });
       } catch (err) {
-        console.error('Error cargando Excel:', err);
+        console.error('Error cargando Excel del repositorio:', err);
+        // Mostrar error específico en la interfaz
+        const errMsg = err instanceof Error ? err.message : String(err);
         setState(prev => ({
           ...prev,
-          errors: [`Error cargando base de datos: ${err}`],
+          errors: [`No se pudo cargar la base de datos: ${errMsg}. Verifica que el archivo base-datos-cobros.xlsx esté en la carpeta public/ del repositorio.`],
           loading: false
         }));
       }
